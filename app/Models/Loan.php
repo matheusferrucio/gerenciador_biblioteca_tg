@@ -157,4 +157,61 @@ class Loan
         $this->db->bind(':book_id', $bookId);
         return (int) $this->db->single()->total > 0;
     }
+
+    // ========================================================
+    // Queries & Filters Module — New methods
+    // ========================================================
+
+    /**
+     * Get overdue loans with full user and book details
+     */
+    public function getOverdueWithUsers(): array
+    {
+        $this->db->query("
+            SELECT l.*, u.name as user_name, u.email as user_email, u.phone as user_phone,
+                   b.title as book_title, b.author as book_author,
+                   DATEDIFF(CURDATE(), l.due_date) as days_overdue
+            FROM loans l
+            JOIN users u ON l.user_id = u.id
+            JOIN books b ON l.book_id = b.id
+            WHERE l.status = 'overdue' OR (l.status = 'active' AND l.due_date < CURDATE())
+            ORDER BY l.due_date ASC
+        ");
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Get distinct users who have at least one overdue item
+     */
+    public function getUsersWithOverdue(): array
+    {
+        $this->db->query("
+            SELECT u.id, u.name, u.email, u.phone,
+                   COUNT(l.id) as overdue_count,
+                   MIN(l.due_date) as oldest_due_date
+            FROM users u
+            JOIN loans l ON l.user_id = u.id
+            WHERE l.status = 'overdue' OR (l.status = 'active' AND l.due_date < CURDATE())
+            GROUP BY u.id, u.name, u.email, u.phone
+            ORDER BY overdue_count DESC
+        ");
+        return $this->db->resultSet();
+    }
+
+    /**
+     * Get all books currently borrowed (available_copies < total_copies)
+     */
+    public function getBorrowedBooks(): array
+    {
+        $this->db->query("
+            SELECT b.id, b.title, b.author, b.isbn, b.total_copies, b.available_copies,
+                   c.name as category_name,
+                   (b.total_copies - b.available_copies) as borrowed_count
+            FROM books b
+            LEFT JOIN categories c ON b.category_id = c.id
+            WHERE b.available_copies < b.total_copies
+            ORDER BY borrowed_count DESC
+        ");
+        return $this->db->resultSet();
+    }
 }

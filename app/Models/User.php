@@ -52,9 +52,10 @@ class User
      */
     public function create(array $data): bool
     {
-        $this->db->query('INSERT INTO users (name, email, password, role, phone) VALUES (:name, :email, :password, :role, :phone)');
+        $this->db->query('INSERT INTO users (name, email, cpf, password, role, phone) VALUES (:name, :email, :cpf, :password, :role, :phone)');
         $this->db->bind(':name', $data['name']);
         $this->db->bind(':email', $data['email']);
+        $this->db->bind(':cpf', !empty($data['cpf']) ? preg_replace('/\D/', '', $data['cpf']) : null);
         $this->db->bind(':password', password_hash($data['password'], PASSWORD_DEFAULT));
         $this->db->bind(':role', $data['role']);
         $this->db->bind(':phone', $data['phone'] ?? null);
@@ -66,7 +67,7 @@ class User
      */
     public function update(int $id, array $data): bool
     {
-        $sql = 'UPDATE users SET name = :name, email = :email, role = :role, phone = :phone';
+        $sql = 'UPDATE users SET name = :name, email = :email, cpf = :cpf, role = :role, phone = :phone';
 
         // Only update password if provided
         if (!empty($data['password'])) {
@@ -78,6 +79,7 @@ class User
         $this->db->query($sql);
         $this->db->bind(':name', $data['name']);
         $this->db->bind(':email', $data['email']);
+        $this->db->bind(':cpf', !empty($data['cpf']) ? preg_replace('/\D/', '', $data['cpf']) : null);
         $this->db->bind(':role', $data['role']);
         $this->db->bind(':phone', $data['phone'] ?? null);
         $this->db->bind(':id', $id);
@@ -119,6 +121,27 @@ class User
         }
         $this->db->query($sql);
         $this->db->bind(':email', $email);
+        if ($excludeId) {
+            $this->db->bind(':id', $excludeId);
+        }
+        return (int) $this->db->single()->total > 0;
+    }
+
+    /**
+     * Check if CPF exists (optionally excluding an ID)
+     */
+    public function cpfExists(string $cpf, ?int $excludeId = null): bool
+    {
+        $cpf = preg_replace('/\D/', '', $cpf);
+        if (empty($cpf)) {
+            return false;
+        }
+        $sql = 'SELECT COUNT(*) as total FROM users WHERE cpf = :cpf';
+        if ($excludeId) {
+            $sql .= ' AND id != :id';
+        }
+        $this->db->query($sql);
+        $this->db->bind(':cpf', $cpf);
         if ($excludeId) {
             $this->db->bind(':id', $excludeId);
         }

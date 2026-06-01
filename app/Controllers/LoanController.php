@@ -34,15 +34,22 @@ class LoanController extends Controller
 
     /**
      * Show create loan form (Admin)
+     * Passes auto-calculated suggested due date
      */
     public function create(): void
     {
         $this->requireAdmin();
 
+        // Auto-calculate due date: 14 business days from today
+        $suggestedDueDate = DateCalculator::calculateDueDate(
+            date('Y-m-d'), 14, true, true
+        );
+
         $data = [
-            'title' => 'Registrar Empréstimo',
-            'users' => $this->userModel->getAllMembers(),
-            'books' => $this->bookModel->getAvailable(),
+            'title'            => 'Registrar Empréstimo',
+            'users'            => $this->userModel->getAllMembers(),
+            'books'            => $this->bookModel->getAvailable(),
+            'suggestedDueDate' => $suggestedDueDate,
         ];
 
         $this->view('admin/loans/create', $data);
@@ -135,6 +142,36 @@ class LoanController extends Controller
         }
 
         $this->redirect('loans');
+    }
+
+    /**
+     * AJAX endpoint — Calculate due date based on loan period
+     * Responds with JSON
+     */
+    public function calculateDate(): void
+    {
+        $this->requireAdmin();
+
+        $days = (int)($_GET['days'] ?? 14);
+        $skipWeekends = ($_GET['skipWeekends'] ?? '1') === '1';
+        $skipHolidays = ($_GET['skipHolidays'] ?? '1') === '1';
+        $startDate = date('Y-m-d');
+
+        // Clamp days to valid range
+        $days = max(1, min(90, $days));
+
+        $dueDate = DateCalculator::calculateDueDate($startDate, $days, $skipWeekends, $skipHolidays);
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success'   => true,
+            'due_date'  => $dueDate,
+            'formatted' => date('d/m/Y', strtotime($dueDate)),
+            'days'      => $days,
+            'skipWeekends' => $skipWeekends,
+            'skipHolidays' => $skipHolidays,
+        ]);
+        exit;
     }
 
     /**

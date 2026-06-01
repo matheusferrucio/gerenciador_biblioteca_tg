@@ -18,13 +18,16 @@ class DashboardController extends Controller
             $loanModel->updateOverdue();
 
             $data = [
-                'title'         => 'Dashboard',
-                'totalBooks'    => $bookModel->count(),
-                'totalUsers'    => $userModel->count(),
-                'activeLoans'   => $loanModel->countActive(),
-                'overdueLoans'  => $loanModel->countOverdue(),
-                'recentLoans'   => $loanModel->getActive(),
-                'flash'         => $this->getFlash(),
+                'title'          => 'Dashboard',
+                'totalBooks'     => $bookModel->count(),
+                'totalUsers'     => $userModel->count(),
+                'activeLoans'    => $loanModel->countActive(),
+                'overdueLoans'   => $loanModel->countOverdue(),
+                'recentLoans'    => $loanModel->getActive(),
+                'overdueList'    => $loanModel->getOverdueWithUsers(),
+                'borrowedBooks'  => $loanModel->getBorrowedBooks(),
+                'usersOverdue'   => $loanModel->getUsersWithOverdue(),
+                'flash'          => $this->getFlash(),
             ];
 
             $this->view('admin/dashboard', $data);

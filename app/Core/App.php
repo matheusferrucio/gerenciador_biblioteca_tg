@@ -17,6 +17,8 @@ class App
         require_once __DIR__ . '/Database.php';
         require_once __DIR__ . '/Controller.php';
         require_once __DIR__ . '/Router.php';
+        require_once __DIR__ . '/Validator.php';
+        require_once __DIR__ . '/DateCalculator.php';
 
         // Load models
         require_once __DIR__ . '/../Models/User.php';
@@ -71,6 +73,7 @@ class App
         $this->router->get('loans/create', 'LoanController', 'create');
         $this->router->post('loans/store', 'LoanController', 'store');
         $this->router->get('loans/return/{id}', 'LoanController', 'returnLoan');
+        $this->router->get('loans/calculate-date', 'LoanController', 'calculateDate');
 
         // ── User Portal ──
         $this->router->get('catalog', 'DashboardController', 'catalog');

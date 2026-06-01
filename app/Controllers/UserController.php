@@ -40,7 +40,7 @@ class UserController extends Controller
     }
 
     /**
-     * Store a new user
+     * Store a new user — with full Validator integration
      */
     public function store(): void
     {
@@ -51,35 +51,52 @@ class UserController extends Controller
             return;
         }
 
-        $data = [
-            'name'     => trim($_POST['name'] ?? ''),
-            'email'    => trim($_POST['email'] ?? ''),
-            'password' => trim($_POST['password'] ?? ''),
-            'role'     => trim($_POST['role'] ?? 'user'),
-            'phone'    => trim($_POST['phone'] ?? ''),
+        // Sanitize all inputs against XSS
+        $raw = [
+            'name'     => $_POST['name'] ?? '',
+            'email'    => $_POST['email'] ?? '',
+            'cpf'      => $_POST['cpf'] ?? '',
+            'password' => $_POST['password'] ?? '',
+            'role'     => $_POST['role'] ?? 'user',
+            'phone'    => $_POST['phone'] ?? '',
         ];
 
-        // Validation
-        if (empty($data['name']) || empty($data['email']) || empty($data['password'])) {
-            $this->setFlash('error', 'Preencha todos os campos obrigatórios.');
-            $this->redirect('users/create');
-            return;
+        $data = Validator::sanitizeArray($raw);
+        // Keep raw password for hashing (sanitization would mangle special chars)
+        $data['password'] = trim($raw['password']);
+
+        // ── Validation ──
+        $validator = new Validator();
+        $validator->validateRequired($data, ['name', 'email', 'password'], [
+            'name'     => 'Nome',
+            'email'    => 'E-mail',
+            'password' => 'Senha',
+        ]);
+        $validator->validateEmail($data['email']);
+        $validator->validateStrongPassword($data['password']);
+
+        // CPF validation (optional field)
+        if (!empty($data['cpf'])) {
+            $validator->validateCPF($data['cpf']);
         }
 
-        if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            $this->setFlash('error', 'E-mail inválido.');
-            $this->redirect('users/create');
-            return;
+        // Validate role is allowed value
+        if (!in_array($data['role'], ['admin', 'user'])) {
+            $validator->addError('Perfil inválido.');
         }
 
-        if ($this->userModel->emailExists($data['email'])) {
-            $this->setFlash('error', 'Este e-mail já está cadastrado.');
-            $this->redirect('users/create');
-            return;
+        // Data integrity: unique email
+        if (!$validator->hasErrors() && $this->userModel->emailExists($data['email'])) {
+            $validator->addError('Este e-mail já está cadastrado.');
         }
 
-        if (strlen($data['password']) < 6) {
-            $this->setFlash('error', 'A senha deve ter no mínimo 6 caracteres.');
+        // Data integrity: unique CPF
+        if (!$validator->hasErrors() && !empty($data['cpf']) && $this->userModel->cpfExists($data['cpf'])) {
+            $validator->addError('Este CPF já está cadastrado.');
+        }
+
+        if ($validator->hasErrors()) {
+            $this->setFlash('error', $validator->getFirstError());
             $this->redirect('users/create');
             return;
         }
@@ -117,7 +134,7 @@ class UserController extends Controller
     }
 
     /**
-     * Update a user
+     * Update a user — with full Validator integration
      */
     public function update(int $id): void
     {
@@ -128,29 +145,52 @@ class UserController extends Controller
             return;
         }
 
-        $data = [
-            'name'     => trim($_POST['name'] ?? ''),
-            'email'    => trim($_POST['email'] ?? ''),
-            'password' => trim($_POST['password'] ?? ''),
-            'role'     => trim($_POST['role'] ?? 'user'),
-            'phone'    => trim($_POST['phone'] ?? ''),
+        // Sanitize all inputs
+        $raw = [
+            'name'     => $_POST['name'] ?? '',
+            'email'    => $_POST['email'] ?? '',
+            'cpf'      => $_POST['cpf'] ?? '',
+            'password' => $_POST['password'] ?? '',
+            'role'     => $_POST['role'] ?? 'user',
+            'phone'    => $_POST['phone'] ?? '',
         ];
 
-        // Validation
-        if (empty($data['name']) || empty($data['email'])) {
-            $this->setFlash('error', 'Preencha todos os campos obrigatórios.');
-            $this->redirect('users/edit/' . $id);
-            return;
+        $data = Validator::sanitizeArray($raw);
+        $data['password'] = trim($raw['password']);
+
+        // ── Validation ──
+        $validator = new Validator();
+        $validator->validateRequired($data, ['name', 'email'], [
+            'name'  => 'Nome',
+            'email' => 'E-mail',
+        ]);
+        $validator->validateEmail($data['email']);
+
+        // Password is optional on edit, but if provided must be strong
+        if (!empty($data['password'])) {
+            $validator->validateStrongPassword($data['password']);
         }
 
-        if ($this->userModel->emailExists($data['email'], $id)) {
-            $this->setFlash('error', 'Este e-mail já está cadastrado por outro usuário.');
-            $this->redirect('users/edit/' . $id);
-            return;
+        if (!empty($data['cpf'])) {
+            $validator->validateCPF($data['cpf']);
         }
 
-        if (!empty($data['password']) && strlen($data['password']) < 6) {
-            $this->setFlash('error', 'A senha deve ter no mínimo 6 caracteres.');
+        if (!in_array($data['role'], ['admin', 'user'])) {
+            $validator->addError('Perfil inválido.');
+        }
+
+        // Unique email check (excluding current user)
+        if (!$validator->hasErrors() && $this->userModel->emailExists($data['email'], $id)) {
+            $validator->addError('Este e-mail já está cadastrado por outro usuário.');
+        }
+
+        // Unique CPF check
+        if (!$validator->hasErrors() && !empty($data['cpf']) && $this->userModel->cpfExists($data['cpf'], $id)) {
+            $validator->addError('Este CPF já está cadastrado por outro usuário.');
+        }
+
+        if ($validator->hasErrors()) {
+            $this->setFlash('error', $validator->getFirstError());
             $this->redirect('users/edit/' . $id);
             return;
         }
