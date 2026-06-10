@@ -6,11 +6,44 @@
         <a href="<?= BASE_URL ?>/loans/create" class="btn btn-primary btn-sm">+ Novo Empréstimo</a>
     </div>
     <div class="card-body">
+        <!-- ── Filter Bar ── -->
+        <div class="filter-bar" id="loanFilterBar">
+            <div class="filter-group">
+                <label for="filterStatus">Status</label>
+                <select id="filterStatus">
+                    <option value="">Todos</option>
+                    <option value="active">Ativo</option>
+                    <option value="returned">Devolvido</option>
+                    <option value="overdue">Em Atraso</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="filterLoanFrom">Empréstimo de</label>
+                <input type="date" id="filterLoanFrom">
+            </div>
+            <div class="filter-group">
+                <label for="filterLoanTo">Empréstimo até</label>
+                <input type="date" id="filterLoanTo">
+            </div>
+            <div class="filter-group">
+                <label for="filterDueFrom">Devolução de</label>
+                <input type="date" id="filterDueFrom">
+            </div>
+            <div class="filter-group">
+                <label for="filterDueTo">Devolução até</label>
+                <input type="date" id="filterDueTo">
+            </div>
+            <div class="filter-actions">
+                <button type="button" class="btn btn-secondary btn-sm" id="clearFilters">Limpar</button>
+            </div>
+        </div>
+        <p class="filter-count" id="filterCount"></p>
+
         <?php if (empty($loans)): ?>
             <div class="empty-state"><p>Nenhum empréstimo registrado.</p></div>
         <?php else: ?>
             <div class="table-responsive">
-                <table class="table">
+                <table class="table" id="loansFilterTable">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -28,18 +61,25 @@
                             <?php
                                 $isOverdue = $loan->status === 'overdue' || 
                                     ($loan->status === 'active' && strtotime($loan->due_date) < time());
-                                $statusLabel = match(true) {
-                                    $loan->status === 'returned' => 'Devolvido',
-                                    $isOverdue => 'Em Atraso',
+                                $statusKey = match(true) {
+                                    $loan->status === 'returned' => 'returned',
+                                    $isOverdue => 'overdue',
+                                    default => 'active',
+                                };
+                                $statusLabel = match($statusKey) {
+                                    'returned' => 'Devolvido',
+                                    'overdue' => 'Em Atraso',
                                     default => 'Ativo',
                                 };
-                                $statusClass = match(true) {
-                                    $loan->status === 'returned' => 'secondary',
-                                    $isOverdue => 'danger',
+                                $statusClass = match($statusKey) {
+                                    'returned' => 'secondary',
+                                    'overdue' => 'danger',
                                     default => 'success',
                                 };
                             ?>
-                            <tr>
+                            <tr data-status="<?= $statusKey ?>"
+                                data-loan-date="<?= $loan->loan_date ?>"
+                                data-due-date="<?= $loan->due_date ?>">
                                 <td><?= $loan->id ?></td>
                                 <td><strong><?= htmlspecialchars($loan->book_title) ?></strong></td>
                                 <td><?= htmlspecialchars($loan->user_name) ?></td>

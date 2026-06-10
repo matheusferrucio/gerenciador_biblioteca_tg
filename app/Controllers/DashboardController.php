@@ -23,7 +23,7 @@ class DashboardController extends Controller
                 'totalUsers'     => $userModel->count(),
                 'activeLoans'    => $loanModel->countActive(),
                 'overdueLoans'   => $loanModel->countOverdue(),
-                'recentLoans'    => $loanModel->getActive(),
+                'recentLoans'    => $loanModel->getAll(),
                 'overdueList'    => $loanModel->getOverdueWithUsers(),
                 'borrowedBooks'  => $loanModel->getBorrowedBooks(),
                 'usersOverdue'   => $loanModel->getUsersWithOverdue(),

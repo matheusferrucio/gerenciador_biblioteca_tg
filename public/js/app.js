@@ -117,4 +117,102 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+
+    // ── Loan Filters (Dashboard + Loans Index) ──
+    initLoanFilters();
 });
+
+/**
+ * Inicializa os filtros de empréstimos
+ * Funciona em toda página que tem #loansFilterTable e os inputs de filtro
+ * 
+ * A função é chamado no final dentro do DOMContentLoaded
+ */
+function initLoanFilters() {
+    var table = document.getElementById('loansFilterTable');
+    var filterBar = document.getElementById('loanFilterBar');
+    if (!table || !filterBar) return;
+
+    var statusSelect = document.getElementById('filterStatus');
+    var loanFrom = document.getElementById('filterLoanFrom');
+    var loanTo = document.getElementById('filterLoanTo');
+    var dueFrom = document.getElementById('filterDueFrom');
+    var dueTo = document.getElementById('filterDueTo');
+    var clearBtn = document.getElementById('clearFilters');
+    var countEl = document.getElementById('filterCount');
+
+    var rows = table.querySelectorAll('tbody tr');
+    var totalRows = rows.length;
+
+    function applyFilters() {
+        var status = statusSelect ? statusSelect.value : '';
+        var lfrom = loanFrom ? loanFrom.value : '';
+        var lto = loanTo ? loanTo.value : '';
+        var dfrom = dueFrom ? dueFrom.value : '';
+        var dto = dueTo ? dueTo.value : '';
+
+        var visible = 0;
+
+        rows.forEach(function (row) {
+            var rowStatus = row.getAttribute('data-status') || '';
+            var rowLoanDate = row.getAttribute('data-loan-date') || '';
+            var rowDueDate = row.getAttribute('data-due-date') || '';
+
+            var show = true;
+
+            // Filter by status
+            if (status && rowStatus !== status) {
+                show = false;
+            }
+
+            // Filter by loan date range
+            if (show && lfrom && rowLoanDate < lfrom) {
+                show = false;
+            }
+            if (show && lto && rowLoanDate > lto) {
+                show = false;
+            }
+
+            // Filter by due date range
+            if (show && dfrom && rowDueDate < dfrom) {
+                show = false;
+            }
+            if (show && dto && rowDueDate > dto) {
+                show = false;
+            }
+
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        // Update count
+        if (countEl) {
+            var hasFilter = status || lfrom || lto || dfrom || dto;
+            if (hasFilter) {
+                countEl.innerHTML = '<strong>' + visible + '</strong> de ' + totalRows + ' empréstimo(s) encontrado(s)';
+            } else {
+                countEl.innerHTML = '';
+            }
+        }
+    }
+
+    // Bind change events to all filter inputs
+    [statusSelect, loanFrom, loanTo, dueFrom, dueTo].forEach(function (el) {
+        if (el) {
+            el.addEventListener('change', applyFilters);
+            el.addEventListener('input', applyFilters);
+        }
+    });
+
+    // Clear filters button
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            if (statusSelect) statusSelect.value = '';
+            if (loanFrom) loanFrom.value = '';
+            if (loanTo) loanTo.value = '';
+            if (dueFrom) dueFrom.value = '';
+            if (dueTo) dueTo.value = '';
+            applyFilters();
+        });
+    }
+}
