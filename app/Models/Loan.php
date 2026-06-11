@@ -214,4 +214,18 @@ class Loan
         ");
         return $this->db->resultSet();
     }
+    /**
+     * Extend a loan return date
+     */
+    public function extend(int $id, string $newDueDate): bool
+    {
+        $this->db->query("
+            UPDATE loans 
+            SET due_date = :due_date, status = 'active' 
+            WHERE id = :id
+        ");
+        $this->db->bind(':due_date', $newDueDate);
+        $this->db->bind(':id', $id);
+        return $this->db->execute();
+    }
 }

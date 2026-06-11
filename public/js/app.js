@@ -129,7 +129,76 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Book Filters ──
     initBookFilters();
+
+    // ── Extend Loan Modal ──
+    initExtendModal();
 });
+
+/**
+ * Logic for the Loan Extension (Prorrogação) Modal
+ */
+function initExtendModal() {
+    const modal = document.getElementById('extendModal');
+    if (!modal) return;
+
+    const extendButtons = document.querySelectorAll('.btn-extend');
+    const closeButtons  = modal.querySelectorAll('.modal-close, .modal-close-btn');
+    const form          = document.getElementById('extendForm');
+    const loanIdInput   = document.getElementById('extendLoanId');
+    const bookTitleSpan = document.getElementById('extendBookTitle');
+    const dateInput     = document.getElementById('new_due_date');
+    const quickOpts     = modal.querySelectorAll('.btn-extend-opt');
+
+    let originalDueDate = '';
+
+    function openModal(e) {
+        const btn = e.currentTarget;
+        const id = btn.getAttribute('data-id');
+        const due = btn.getAttribute('data-due');
+        const title = btn.getAttribute('data-title');
+
+        originalDueDate = due;
+        loanIdInput.value = id;
+        bookTitleSpan.textContent = title;
+        
+        // Update form action URL structure if necessary, 
+        // but here we use a hidden input and static action /loans/extend
+        form.action = form.action.split('?')[0] + '/' + id;
+
+        // Set min date to original due date
+        dateInput.min = due;
+        dateInput.value = due;
+
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent scroll
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Quick add days logic
+    quickOpts.forEach(opt => {
+        opt.addEventListener('click', () => {
+            const daysToAdd = parseInt(opt.getAttribute('data-days'));
+            const baseDate = new Date(originalDueDate + 'T12:00:00'); // Use original as base
+            baseDate.setDate(baseDate.getDate() + daysToAdd);
+            
+            // Format to YYYY-MM-DD
+            const newDateStr = baseDate.toISOString().split('T')[0];
+            dateInput.value = newDateStr;
+        });
+    });
+
+    extendButtons.forEach(btn => btn.addEventListener('click', openModal));
+    closeButtons.forEach(btn => btn.addEventListener('click', closeModal));
+
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+}
 
 /**
  * Initialize client-side book filtering

@@ -89,11 +89,20 @@
                                 <td><span class="badge badge-<?= $statusClass ?>"><?= $statusLabel ?></span></td>
                                 <td>
                                     <?php if ($loan->status !== 'returned'): ?>
-                                        <a href="<?= BASE_URL ?>/loans/return/<?= $loan->id ?>" 
-                                           class="btn btn-success btn-sm btn-confirm"
-                                           data-confirm="Confirmar devolução do livro '<?= htmlspecialchars($loan->book_title) ?>'?">
-                                            Devolver
-                                        </a>
+                                        <div class="actions" style="display: flex; gap: 5px;">
+                                            <a href="<?= BASE_URL ?>/loans/return/<?= $loan->id ?>" 
+                                               class="btn btn-success btn-sm btn-confirm"
+                                               data-confirm="Confirmar devolução do livro '<?= htmlspecialchars($loan->book_title) ?>'?">
+                                                Devolver
+                                            </a>
+                                            <button type="button" 
+                                                    class="btn btn-warning btn-sm btn-extend"
+                                                    data-id="<?= $loan->id ?>"
+                                                    data-due="<?= $loan->due_date ?>"
+                                                    data-title="<?= htmlspecialchars($loan->book_title) ?>">
+                                                Prorrogar
+                                            </button>
+                                        </div>
                                     <?php else: ?>
                                         <span class="text-muted">—</span>
                                     <?php endif; ?>

@@ -150,6 +150,43 @@ class LoanController extends Controller
     }
 
     /**
+     * Extend a loan (Prorrogar)
+     */
+    public function extend(int $id): void
+    {
+        $this->requireAdmin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $this->redirect('loans');
+            return;
+        }
+
+        $newDueDate = trim($_POST['new_due_date'] ?? '');
+        $loan = $this->loanModel->findById($id);
+
+        if (!$loan) {
+            $this->setFlash('error', 'Empréstimo não encontrado.');
+            $this->redirect('loans');
+            return;
+        }
+
+        // Validation: Must be a valid date and > current due date
+        if (empty($newDueDate) || strtotime($newDueDate) <= strtotime($loan->due_date)) {
+            $this->setFlash('error', 'A nova data de devolução deve ser superior à data original.');
+            $this->redirect('loans');
+            return;
+        }
+
+        if ($this->loanModel->extend($id, $newDueDate)) {
+            $this->setFlash('success', 'Prazo prorrogado com sucesso!');
+        } else {
+            $this->setFlash('error', 'Erro ao prorrogar prazo.');
+        }
+
+        $this->redirect('loans');
+    }
+
+    /**
      * AJAX endpoint — Calculate due date based on loan period
      * Responds with JSON
      */

@@ -73,6 +73,7 @@ class App
         $this->router->get('loans/create', 'LoanController', 'create');
         $this->router->post('loans/store', 'LoanController', 'store');
         $this->router->get('loans/return/{id}', 'LoanController', 'returnLoan');
+        $this->router->post('loans/extend/{id}', 'LoanController', 'extend');
         $this->router->get('loans/calculate-date', 'LoanController', 'calculateDate');
 
         // ── User Portal ──
