@@ -19,9 +19,10 @@ class BookController extends Controller
         $this->requireAdmin();
 
         $data = [
-            'title' => 'Gerenciar Livros',
-            'books' => $this->bookModel->getAll(),
-            'flash' => $this->getFlash(),
+            'title'      => 'Gerenciar Livros',
+            'books'      => $this->bookModel->getAll(),
+            'categories' => $this->categoryModel->getAll(),
+            'flash'      => $this->getFlash(),
         ];
 
         $this->view('admin/books/index', $data);

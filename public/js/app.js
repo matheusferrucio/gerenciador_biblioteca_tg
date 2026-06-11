@@ -126,7 +126,92 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Phone Mask (Brazilian format) ──
     initPhoneMask();
+
+    // ── Book Filters ──
+    initBookFilters();
 });
+
+/**
+ * Initialize client-side book filtering
+ */
+function initBookFilters() {
+    var table = document.getElementById('booksFilterTable');
+    var filterBar = document.getElementById('bookFilterBar');
+    if (!table || !filterBar) return;
+
+    var searchInput = document.getElementById('bookSearch');
+    var catSelect   = document.getElementById('bookCategory');
+    var availSelect = document.getElementById('bookAvailability');
+    var clearBtn    = document.getElementById('clearBookFilters');
+    var countEl     = document.getElementById('bookFilterCount');
+
+    var rows = table.querySelectorAll('tbody tr');
+    var totalRows = rows.length;
+
+    function applyFilters() {
+        var query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        var cat   = catSelect ? catSelect.value : '';
+        var avail = availSelect ? availSelect.value : '';
+
+        var visible = 0;
+
+        rows.forEach(function (row) {
+            var title    = row.getAttribute('data-title') || '';
+            var author   = row.getAttribute('data-author') || '';
+            var isbn     = row.getAttribute('data-isbn') || '';
+            var rowCat   = row.getAttribute('data-cat') || '';
+            var rowAvail = row.getAttribute('data-available') || '';
+
+            var show = true;
+
+            // Search by text (Title, Author or ISBN)
+            if (query && !title.includes(query) && !author.includes(query) && !isbn.includes(query)) {
+                show = false;
+            }
+
+            // Filter by Category
+            if (show && cat && rowCat !== cat) {
+                show = false;
+            }
+
+            // Filter by Availability
+            if (show && avail && rowAvail !== avail) {
+                show = false;
+            }
+
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        // Update count
+        if (countEl) {
+            var hasFilter = query || cat || avail;
+            if (hasFilter) {
+                countEl.innerHTML = '<strong>' + visible + '</strong> de ' + totalRows + ' livro(s) encontrado(s)';
+            } else {
+                countEl.innerHTML = '';
+            }
+        }
+    }
+
+    // Bind events
+    [searchInput, catSelect, availSelect].forEach(function (el) {
+        if (el) {
+            el.addEventListener('input', applyFilters);
+            el.addEventListener('change', applyFilters);
+        }
+    });
+
+    // Clear filters
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function () {
+            if (searchInput) searchInput.value = '';
+            if (catSelect) catSelect.value = '';
+            if (availSelect) availSelect.value = '';
+            applyFilters();
+        });
+    }
+}
 
 /**
  * Applies a Brazilian phone mask (00) 00000-0000 to #phone inputs

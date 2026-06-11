@@ -11,8 +11,38 @@
                 <p>Nenhum livro cadastrado.</p>
             </div>
         <?php else: ?>
+            <!-- ── Filter Bar ── -->
+            <div class="filter-bar" id="bookFilterBar">
+                <div class="filter-group">
+                    <label for="bookSearch">Busca</label>
+                    <input type="text" id="bookSearch" placeholder="Título, autor ou ISBN...">
+                </div>
+                <div class="filter-group">
+                    <label for="bookCategory">Categoria</label>
+                    <select id="bookCategory">
+                        <option value="">Todas as Categorias</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?= $cat->id ?>"><?= htmlspecialchars($cat->name) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="bookAvailability">Disponibilidade</label>
+                    <select id="bookAvailability">
+                        <option value="">Todas</option>
+                        <option value="available">Disponíveis</option>
+                        <option value="unavailable">Indisponíveis</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button type="button" id="clearBookFilters" class="btn-clear">Limpar</button>
+                </div>
+            </div>
+
+            <div id="bookFilterCount" class="filter-count"></div>
+
             <div class="table-responsive">
-                <table class="table" id="booksTable">
+                <table class="table" id="booksFilterTable">
                     <thead>
                         <tr>
                             <th>Título</th>
@@ -26,7 +56,11 @@
                     </thead>
                     <tbody>
                         <?php foreach ($books as $book): ?>
-                            <tr>
+                            <tr data-title="<?= htmlspecialchars(strtolower($book->title)) ?>" 
+                                data-author="<?= htmlspecialchars(strtolower($book->author)) ?>" 
+                                data-isbn="<?= htmlspecialchars($book->isbn) ?>"
+                                data-cat="<?= $book->category_id ?>"
+                                data-available="<?= $book->available_copies > 0 ? 'available' : 'unavailable' ?>">
                                 <td><strong><?= htmlspecialchars($book->title) ?></strong></td>
                                 <td><?= htmlspecialchars($book->author) ?></td>
                                 <td><code><?= htmlspecialchars($book->isbn) ?></code></td>
