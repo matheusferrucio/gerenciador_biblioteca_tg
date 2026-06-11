@@ -1082,3 +1082,69 @@ td.actions {
 .filter-count strong {
     color: var(--gray-800);
 }
+
+/* ── Validation States ── */
+.input-error {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.input-success {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* ── Password Requirements ── */
+.password-requirements {
+    list-style: none;
+    padding: 12px;
+    margin-top: 8px;
+    background: var(--gray-50);
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-200);
+    font-size: 12px;
+    color: var(--gray-600);
+}
+
+.password-requirements li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    transition: var(--transition);
+}
+
+.password-requirements li:last-child {
+    margin-bottom: 0;
+}
+
+.requirement-icon {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--gray-300);
+    transition: var(--transition);
+}
+
+.password-requirements li.valid {
+    color: #059669;
+    font-weight: 500;
+}
+
+.password-requirements li.valid .requirement-icon {
+    background-color: #10b981;
+    transform: scale(1.2);
+}
+
+.password-requirements li.invalid {
+    color: #dc2626;
+}
+
+.password-instructions {
+    font-size: 11px;
+    color: var(--gray-500);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}

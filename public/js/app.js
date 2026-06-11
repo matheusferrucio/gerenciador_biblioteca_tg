@@ -120,7 +120,129 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Loan Filters (Dashboard + Loans Index) ──
     initLoanFilters();
+
+    // ── Password Validation (User Registration) ──
+    initPasswordValidation();
+
+    // ── Phone Mask (Brazilian format) ──
+    initPhoneMask();
 });
+
+/**
+ * Applies a Brazilian phone mask (00) 00000-0000 to #phone inputs
+ */
+function initPhoneMask() {
+    const phoneInputs = document.querySelectorAll('#phone');
+    
+    phoneInputs.forEach(input => {
+        input.addEventListener('input', e => {
+            let value = e.target.value.replace(/\D/g, ""); // Remove non-digits
+            
+            // Limit to 11 digits (2 for area code + 9 for number)
+            if (value.length > 11) value = value.slice(0, 11);
+
+            // Apply mask
+            if (value.length > 10) {
+                // (00) 00000-0000
+                value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+            } else if (value.length > 5) {
+                // (00) 0000-0000 (standard for 8-digit landlines if needed)
+                value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
+            } else if (value.length > 2) {
+                // (00) 000
+                value = value.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
+            } else if (value.length > 0) {
+                // (00
+                value = value.replace(/^(\d{0,2})/, "($1");
+            }
+
+            e.target.value = value;
+        });
+    });
+}
+
+/**
+ * Validates password requirements in real-time
+ */
+function initPasswordValidation() {
+    const passwordInput = document.getElementById('password');
+    const requirementsList = document.getElementById('passwordRequirements');
+    const reqContainer = document.getElementById('passwordReqContainer');
+    const submitBtn = document.getElementById('btnSubmitUser');
+    
+    if (!passwordInput || !requirementsList) return;
+
+    const requirements = {
+        length:  { el: document.getElementById('req-length'), regex: /.{8,}/ },
+        upper:   { el: document.getElementById('req-upper'),  regex: /[A-Z]/ },
+        lower:   { el: document.getElementById('req-lower'),  regex: /[a-z]/ },
+        number:  { el: document.getElementById('req-number'), regex: /[0-9]/ },
+        special: { el: document.getElementById('req-special'), regex: /[^A-Za-z0-9]/ }
+    };
+
+    function validate() {
+        const val = passwordInput.value;
+        let allValid = true;
+
+        // Show container if hidden (used in Edit form)
+        if (reqContainer && val.length > 0) {
+            reqContainer.style.display = 'block';
+        } else if (reqContainer && val.length === 0) {
+            reqContainer.style.display = 'none';
+        }
+
+        for (const key in requirements) {
+            const req = requirements[key];
+            const isValid = req.regex.test(val);
+            
+            if (isValid) {
+                req.el.classList.add('valid');
+                req.el.classList.remove('invalid');
+            } else {
+                req.el.classList.remove('valid');
+                if (val.length > 0) {
+                    req.el.classList.add('invalid');
+                    allValid = false;
+                } else {
+                    req.el.classList.remove('invalid');
+                    allValid = false;
+                }
+            }
+        }
+
+        // Apply visual feedback to input
+        if (val.length > 0) {
+            if (allValid) {
+                passwordInput.classList.add('input-success');
+                passwordInput.classList.remove('input-error');
+            } else {
+                passwordInput.classList.add('input-error');
+                passwordInput.classList.remove('input-success');
+            }
+        } else {
+            passwordInput.classList.remove('input-success', 'input-error');
+        }
+
+        return allValid;
+    }
+
+    passwordInput.addEventListener('input', validate);
+    
+    // Prevent submission if password exists but is invalid
+    const form = passwordInput.closest('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const val = passwordInput.value;
+            // On create, it's required. On edit, if typed, must be valid.
+            if (passwordInput.hasAttribute('required') || val.length > 0) {
+                if (!validate()) {
+                    e.preventDefault();
+                    passwordInput.focus();
+                }
+            }
+        });
+    }
+}
 
 /**
  * Inicializa os filtros de empréstimos

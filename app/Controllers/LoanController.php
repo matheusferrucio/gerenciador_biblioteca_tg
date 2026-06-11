@@ -40,9 +40,9 @@ class LoanController extends Controller
     {
         $this->requireAdmin();
 
-        // Auto-calculate due date: 14 business days from today
+        // Auto-calculate due date: 10 business days from today
         $suggestedDueDate = DateCalculator::calculateDueDate(
-            date('Y-m-d'), 14, true, true
+            date('Y-m-d'), 10, true, true
         );
 
         $data = [
@@ -74,8 +74,13 @@ class LoanController extends Controller
             'due_date'  => trim($_POST['due_date'] ?? ''),
         ];
 
+        // Fallback: If no due date provided, use default 10 business days
+        if (empty($data['due_date'])) {
+            $data['due_date'] = DateCalculator::calculateDueDate($data['loan_date'], 10, true, true);
+        }
+
         // Validation
-        if ($data['user_id'] === 0 || $data['book_id'] === 0 || empty($data['due_date'])) {
+        if ($data['user_id'] === 0 || $data['book_id'] === 0) {
             $this->setFlash('error', 'Preencha todos os campos obrigatórios.');
             $this->redirect('loans/create');
             return;
@@ -152,7 +157,7 @@ class LoanController extends Controller
     {
         $this->requireAdmin();
 
-        $days = (int)($_GET['days'] ?? 14);
+        $days = (int)($_GET['days'] ?? 10);
         $skipWeekends = ($_GET['skipWeekends'] ?? '1') === '1';
         $skipHolidays = ($_GET['skipHolidays'] ?? '1') === '1';
         $startDate = date('Y-m-d');

@@ -33,8 +33,9 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="due_date">Data de Devolução *</label>
-                    <input type="date" id="due_date" name="due_date" required min="<?= date('Y-m-d', strtotime('+1 day')) ?>">
+                    <label for="due_date">Data de Devolução</label>
+                    <input type="date" id="due_date" name="due_date" value="<?= $suggestedDueDate ?>" min="<?= date('Y-m-d', strtotime('+1 day')) ?>">
+                    <small class="text-muted">Deixe em branco para usar o prazo padrão de 10 dias.</small>
                 </div>
                 <div class="form-group">
                     <!-- spacer -->
