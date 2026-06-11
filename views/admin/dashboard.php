@@ -122,8 +122,8 @@
                                     <?php if ($loan->status !== 'returned'): ?>
                                         <div class="actions" style="display: flex; gap: 5px;">
                                             <a href="<?= BASE_URL ?>/loans/return/<?= $loan->id ?>"
-                                                class="btn btn-success btn-sm btn-confirm"
-                                                data-confirm="Confirmar devolução deste livro?">
+                                                class="btn btn-success btn-sm btn-return"
+                                                data-title="<?= htmlspecialchars($loan->book_title) ?>">
                                                 Devolver
                                             </a>
                                             <button type="button" 

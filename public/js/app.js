@@ -132,7 +132,50 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Extend Loan Modal ──
     initExtendModal();
+
+    // ── Confirm Return Modal ──
+    initReturnModal();
 });
+
+/**
+ * Logic for the custom Return Confirmation Modal
+ */
+function initReturnModal() {
+    const modal = document.getElementById('confirmReturnModal');
+    if (!modal) return;
+
+    const returnButtons = document.querySelectorAll('.btn-return');
+    const closeButtons  = modal.querySelectorAll('.modal-close, .modal-close-btn');
+    const confirmBtn    = document.getElementById('confirmReturnBtn');
+    const bookTitleSpan = document.getElementById('returnBookTitle');
+
+    function openModal(e) {
+        e.preventDefault(); // Stop immediate redirection
+        
+        const btn = e.currentTarget;
+        const title = btn.getAttribute('data-title') || 'este livro';
+        const url = btn.getAttribute('href');
+
+        bookTitleSpan.textContent = title;
+        confirmBtn.setAttribute('href', url);
+
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    returnButtons.forEach(btn => btn.addEventListener('click', openModal));
+    closeButtons.forEach(btn => btn.addEventListener('click', closeModal));
+
+    // Close on overlay click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+}
 
 /**
  * Logic for the Loan Extension (Prorrogação) Modal

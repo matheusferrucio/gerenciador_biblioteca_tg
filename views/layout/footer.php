@@ -35,6 +35,30 @@
         </div>
     </div>
 
+    <!-- ── Modal Confirmar Devolução (Global) ── -->
+    <div class="modal-overlay" id="confirmReturnModal">
+        <div class="modal-dialog">
+            <div class="modal-header" style="background: rgba(34, 197, 94, 0.05); border-bottom-color: rgba(34, 197, 94, 0.1);">
+                <h3 style="color: #166534;">Confirmar Devolução</h3>
+                <button type="button" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" style="text-align: center; padding: 32px 24px;">
+                <div style="font-size: 48px; margin-bottom: 20px;">📚✅</div>
+                <p style="font-size: 16px; color: var(--gray-700); line-height: 1.5;">
+                    Deseja confirmar a devolução do livro:<br>
+                    <strong id="returnBookTitle" style="color: var(--gray-900); font-size: 18px;"></strong>?
+                </p>
+                <p style="margin-top: 15px; font-size: 13px; color: var(--gray-500);">
+                    Esta ação atualizará o status do empréstimo para "Devolvido".
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary modal-close-btn">Cancelar</button>
+                <a href="#" id="confirmReturnBtn" class="btn btn-success">Confirmar Devolução</a>
+            </div>
+        </div>
+    </div>
+
     <script src="<?= BASE_URL ?>/public/js/app.js"></script>
 </body>
 </html>
