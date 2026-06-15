@@ -228,4 +228,12 @@ class Loan
         $this->db->bind(':id', $id);
         return $this->db->execute();
     }
+
+    /**
+     * Get the last inserted ID
+     */
+    public function getLastInsertId(): int
+    {
+        return (int)$this->db->lastInsertId();
+    }
 }

@@ -48,6 +48,12 @@ $isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
                         <span>Empréstimos</span>
                     </a>
                 </li>
+                <li>
+                    <a href="<?= BASE_URL ?>/history" class="<?= $currentUrl === 'history' ? 'active' : '' ?>">
+                        <span class="nav-icon">📜</span>
+                        <span>Histórico</span>
+                    </a>
+                </li>
 
                 <li class="nav-section-title">Portal</li>
             <?php endif; ?>

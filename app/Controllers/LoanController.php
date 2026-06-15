@@ -5,12 +5,14 @@ class LoanController extends Controller
     private Loan $loanModel;
     private Book $bookModel;
     private User $userModel;
+    private History $historyModel;
 
     public function __construct()
     {
-        $this->loanModel = new Loan();
-        $this->bookModel = new Book();
-        $this->userModel = new User();
+        $this->loanModel    = new Loan();
+        $this->bookModel    = new Book();
+        $this->userModel    = new User();
+        $this->historyModel = new History();
     }
 
     /**
@@ -110,6 +112,20 @@ class LoanController extends Controller
 
         // Create loan and decrement copies
         if ($this->loanModel->create($data) && $this->bookModel->decrementCopies($data['book_id'])) {
+            // Log History
+            $loanId = $this->loanModel->getLastInsertId();
+            $user   = $this->userModel->findById($data['user_id']);
+            $book   = $this->bookModel->findById($data['book_id']);
+            
+            $this->historyModel->log([
+                'loan_id'   => $loanId,
+                'action'    => 'Empréstimo',
+                'user_name' => $user->name ?? 'Usuário',
+                'book_title'=> $book->title ?? 'Livro',
+                'loan_date' => $data['loan_date'],
+                'due_date'  => $data['due_date']
+            ]);
+
             $this->setFlash('success', 'Empréstimo registrado com sucesso!');
         } else {
             $this->setFlash('error', 'Erro ao registrar empréstimo.');
@@ -141,6 +157,17 @@ class LoanController extends Controller
 
         // Return loan and increment copies
         if ($this->loanModel->returnLoan($id) && $this->bookModel->incrementCopies($loan->book_id)) {
+            // Log History
+            $this->historyModel->log([
+                'loan_id'   => $id,
+                'action'    => 'Devolução',
+                'user_name' => $loan->user_name,
+                'book_title'=> $loan->book_title,
+                'loan_date' => $loan->loan_date,
+                'due_date'  => $loan->due_date,
+                'details'   => 'Devolução realizada em ' . date('d/m/Y')
+            ]);
+
             $this->setFlash('success', 'Devolução registrada com sucesso!');
         } else {
             $this->setFlash('error', 'Erro ao registrar devolução.');
@@ -178,6 +205,22 @@ class LoanController extends Controller
         }
 
         if ($this->loanModel->extend($id, $newDueDate)) {
+            // Log History
+            $diffDays = (strtotime($newDueDate) - strtotime($loan->due_date)) / (60 * 60 * 24);
+            
+            $this->historyModel->log([
+                'loan_id'        => $id,
+                'action'         => 'Prorrogação',
+                'user_name'      => $loan->user_name,
+                'book_title'     => $loan->book_title,
+                'loan_date'      => $loan->loan_date,
+                'due_date'       => $newDueDate,
+                'old_due_date'   => $loan->due_date,
+                'new_due_date'   => $newDueDate,
+                'extension_days' => max(0, (int)$diffDays),
+                'details'        => 'Prazo estendido em ' . (int)$diffDays . ' dias.'
+            ]);
+
             $this->setFlash('success', 'Prazo prorrogado com sucesso!');
         } else {
             $this->setFlash('error', 'Erro ao prorrogar prazo.');

@@ -135,7 +135,72 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Confirm Return Modal ──
     initReturnModal();
+
+    // ── History Filters ──
+    initHistoryFilters();
 });
+
+/**
+ * Logic for Filtering the History Table
+ */
+function initHistoryFilters() {
+    const filterBar = document.getElementById('historyFilterBar');
+    if (!filterBar) return;
+
+    const selectBook  = document.getElementById('filterBook');
+    const selectUser  = document.getElementById('filterUser');
+    const inputFrom   = document.getElementById('filterDateFrom');
+    const inputTo     = document.getElementById('filterDateTo');
+    const btnClear    = document.getElementById('clearHistoryFilters');
+    const countText   = document.getElementById('historyFilterCount');
+    const rows        = document.querySelectorAll('#historyFilterTable tbody tr');
+
+    function filter() {
+        const valBook = selectBook.value; // Exact match or empty
+        const valUser = selectUser.value; // Exact match or empty
+        const from    = inputFrom.value;  // YYYY-MM-DD
+        const to      = inputTo.value;    // YYYY-MM-DD
+        let count     = 0;
+
+        rows.forEach(row => {
+            const book = row.getAttribute('data-book') || '';
+            const user = row.getAttribute('data-user') || '';
+            const date = row.getAttribute('data-date') || '';
+
+            const matchBook = !valBook || book === valBook;
+            const matchUser = !valUser || user === valUser;
+            const matchFrom = !from    || date >= from;
+            const matchTo   = !to      || date <= to;
+
+            if (matchBook && matchUser && matchFrom && matchTo) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        if (countText) {
+            countText.textContent = `${count} resultado(s) encontrado(s).`;
+        }
+    }
+
+    selectBook.addEventListener('change', filter);
+    selectUser.addEventListener('change', filter);
+    inputFrom.addEventListener('change', filter);
+    inputTo.addEventListener('change', filter);
+
+    btnClear.addEventListener('click', () => {
+        selectBook.value = '';
+        selectUser.value = '';
+        inputFrom.value = '';
+        inputTo.value = '';
+        filter();
+    });
+
+    // Initial count
+    filter();
+}
 
 /**
  * Logic for the custom Return Confirmation Modal

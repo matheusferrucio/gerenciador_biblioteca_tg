@@ -60,10 +60,10 @@ $flash = $flash ?? null;
                 </button>
             </form>
 
-            <div class="login-footer">
+            <!-- <div class="login-footer">
                 <p>Admin: <code>admin@biblioteca.com</code> / <code>admin123</code></p>
                 <p>Usuário: <code>joao@email.com</code> / <code>user123</code></p>
-            </div>
+            </div> -->
         </div>
     </div>
 

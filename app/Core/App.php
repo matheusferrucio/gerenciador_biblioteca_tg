@@ -25,6 +25,7 @@ class App
         require_once __DIR__ . '/../Models/Book.php';
         require_once __DIR__ . '/../Models/Category.php';
         require_once __DIR__ . '/../Models/Loan.php';
+        require_once __DIR__ . '/../Models/History.php';
 
         // Initialize router
         $this->router = new Router();
@@ -75,6 +76,7 @@ class App
         $this->router->get('loans/return/{id}', 'LoanController', 'returnLoan');
         $this->router->post('loans/extend/{id}', 'LoanController', 'extend');
         $this->router->get('loans/calculate-date', 'LoanController', 'calculateDate');
+        $this->router->get('history', 'HistoryController', 'index');
 
         // ── User Portal ──
         $this->router->get('catalog', 'DashboardController', 'catalog');
