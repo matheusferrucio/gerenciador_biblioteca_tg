@@ -8,7 +8,7 @@ define('DB_PASS', '');
 
 // Application Configuration
 define('BASE_URL', '/gerenciador_biblioteca_tg');
-define('APP_NAME', 'Biblioteca TG');
+define('APP_NAME', 'BiblioTrace');
 
 // Session Configuration
 define('SESSION_NAME', 'biblioteca_tg_session');
