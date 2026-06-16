@@ -236,4 +236,24 @@ class Loan
     {
         return (int)$this->db->lastInsertId();
     }
+
+    /**
+     * Get paginated loans with user and book info
+     */
+    public function getPaginated(int $page, int $limit): array
+    {
+        $offset = ($page - 1) * $limit;
+        $this->db->query('
+            SELECT l.*, u.name as user_name, u.email as user_email, 
+                   b.title as book_title, b.author as book_author
+            FROM loans l
+            JOIN users u ON l.user_id = u.id
+            JOIN books b ON l.book_id = b.id
+            ORDER BY l.created_at DESC
+            LIMIT :offset, :limit
+        ');
+        $this->db->bind(':offset', $offset, PDO::PARAM_INT);
+        $this->db->bind(':limit', $limit, PDO::PARAM_INT);
+        return $this->db->resultSet();
+    }
 }

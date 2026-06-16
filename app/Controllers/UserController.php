@@ -16,10 +16,20 @@ class UserController extends Controller
     {
         $this->requireAdmin();
 
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $limit = 30;
+        
+        $totalRecords = $this->userModel->count();
+        $totalPages = ceil($totalRecords / $limit);
+        $users = $this->userModel->getPaginated($page, $limit);
+
         $data = [
-            'title' => 'Gerenciar Usuários',
-            'users' => $this->userModel->getAll(),
-            'flash' => $this->getFlash(),
+            'title'        => 'Gerenciar Usuários',
+            'users'        => $users,
+            'flash'        => $this->getFlash(),
+            'currentPage'  => $page,
+            'totalPages'   => $totalPages,
+            'totalRecords' => $totalRecords
         ];
 
         $this->view('admin/users/index', $data);

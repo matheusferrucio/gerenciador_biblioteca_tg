@@ -25,10 +25,20 @@ class LoanController extends Controller
         // Auto-update overdue loans
         $this->loanModel->updateOverdue();
 
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $limit = 30;
+        
+        $totalRecords = $this->loanModel->count();
+        $totalPages = ceil($totalRecords / $limit);
+        $loans = $this->loanModel->getPaginated($page, $limit);
+
         $data = [
-            'title' => 'Gerenciar Empréstimos',
-            'loans' => $this->loanModel->getAll(),
-            'flash' => $this->getFlash(),
+            'title'        => 'Gerenciar Empréstimos',
+            'loans'        => $loans,
+            'flash'        => $this->getFlash(),
+            'currentPage'  => $page,
+            'totalPages'   => $totalPages,
+            'totalRecords' => $totalRecords
         ];
 
         $this->view('admin/loans/index', $data);

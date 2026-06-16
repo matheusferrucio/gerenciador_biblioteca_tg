@@ -151,4 +151,22 @@ class Book
         }
         return (int) $this->db->single()->total > 0;
     }
+
+    /**
+     * Get paginated books with category names
+     */
+    public function getPaginated(int $page, int $limit): array
+    {
+        $offset = ($page - 1) * $limit;
+        $this->db->query('
+            SELECT b.*, c.name as category_name 
+            FROM books b 
+            LEFT JOIN categories c ON b.category_id = c.id 
+            ORDER BY b.title ASC
+            LIMIT :offset, :limit
+        ');
+        $this->db->bind(':offset', $offset, PDO::PARAM_INT);
+        $this->db->bind(':limit', $limit, PDO::PARAM_INT);
+        return $this->db->resultSet();
+    }
 }

@@ -40,6 +40,29 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- ── Pagination ── -->
+            <?php if ($totalPages > 1): ?>
+                <div class="pagination">
+                    <a href="?page=<?= $currentPage - 1 ?>" class="page-link <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+                        Anterior
+                    </a>
+
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?page=<?= $i ?>" class="page-link <?= $currentPage == $i ? 'active' : '' ?>">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+
+                    <a href="?page=<?= $currentPage + 1 ?>" class="page-link <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
+                        Próximo
+                    </a>
+                </div>
+            <?php endif; ?>
+            
+            <p class="text-muted" style="text-align: center; margin-top: 10px; font-size: 12px;">
+                Mostrando <?= count($categories) ?> de <?= $totalRecords ?> categorias totais.
+            </p>
         <?php endif; ?>
     </div>
 </div>

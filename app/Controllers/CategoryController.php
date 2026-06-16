@@ -16,7 +16,12 @@ class CategoryController extends Controller
     {
         $this->requireAdmin();
 
-        $categories = $this->categoryModel->getAll();
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $limit = 30;
+        
+        $totalRecords = $this->categoryModel->count();
+        $totalPages = ceil($totalRecords / $limit);
+        $categories = $this->categoryModel->getPaginated($page, $limit);
 
         // Add book count to each category
         foreach ($categories as $category) {
@@ -24,9 +29,12 @@ class CategoryController extends Controller
         }
 
         $data = [
-            'title'      => 'Gerenciar Categorias',
-            'categories' => $categories,
-            'flash'      => $this->getFlash(),
+            'title'        => 'Gerenciar Categorias',
+            'categories'   => $categories,
+            'flash'        => $this->getFlash(),
+            'currentPage'  => $page,
+            'totalPages'   => $totalPages,
+            'totalRecords' => $totalRecords
         ];
 
         $this->view('admin/categories/index', $data);

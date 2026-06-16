@@ -147,4 +147,16 @@ class User
         }
         return (int) $this->db->single()->total > 0;
     }
+
+    /**
+     * Get paginated users
+     */
+    public function getPaginated(int $page, int $limit): array
+    {
+        $offset = ($page - 1) * $limit;
+        $this->db->query('SELECT * FROM users ORDER BY name ASC LIMIT :offset, :limit');
+        $this->db->bind(':offset', $offset, PDO::PARAM_INT);
+        $this->db->bind(':limit', $limit, PDO::PARAM_INT);
+        return $this->db->resultSet();
+    }
 }

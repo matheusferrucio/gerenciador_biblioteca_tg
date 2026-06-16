@@ -18,11 +18,21 @@ class BookController extends Controller
     {
         $this->requireAdmin();
 
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $limit = 30;
+        
+        $totalRecords = $this->bookModel->count();
+        $totalPages = ceil($totalRecords / $limit);
+        $books = $this->bookModel->getPaginated($page, $limit);
+
         $data = [
-            'title'      => 'Gerenciar Livros',
-            'books'      => $this->bookModel->getAll(),
-            'categories' => $this->categoryModel->getAll(),
-            'flash'      => $this->getFlash(),
+            'title'        => 'Gerenciar Livros',
+            'books'        => $books,
+            'categories'   => $this->categoryModel->getAll(),
+            'flash'        => $this->getFlash(),
+            'currentPage'  => $page,
+            'totalPages'   => $totalPages,
+            'totalRecords' => $totalRecords
         ];
 
         $this->view('admin/books/index', $data);

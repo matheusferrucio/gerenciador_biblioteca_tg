@@ -79,4 +79,16 @@ class Category
         $this->db->bind(':id', $id);
         return (int) $this->db->single()->total;
     }
+
+    /**
+     * Get paginated categories
+     */
+    public function getPaginated(int $page, int $limit): array
+    {
+        $offset = ($page - 1) * $limit;
+        $this->db->query('SELECT * FROM categories ORDER BY name ASC LIMIT :offset, :limit');
+        $this->db->bind(':offset', $offset, PDO::PARAM_INT);
+        $this->db->bind(':limit', $limit, PDO::PARAM_INT);
+        return $this->db->resultSet();
+    }
 }
