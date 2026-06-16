@@ -23,10 +23,22 @@ class HistoryController extends Controller
     {
         $this->requireAdmin();
 
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $limit = 30;
+        
+        $totalRecords = $this->historyModel->countAll();
+        $totalPages = ceil($totalRecords / $limit);
+        $history = $this->historyModel->getPaginated($page, $limit);
+
         $data = [
-            'title'   => 'Histórico de Empréstimos',
-            'history' => $this->historyModel->getAll(),
-            'flash'   => $this->getFlash(),
+            'title'        => 'Histórico de Empréstimos',
+            'history'      => $history,
+            'books'        => $this->bookModel->getAll(),
+            'users'        => $this->userModel->getAll(),
+            'flash'        => $this->getFlash(),
+            'currentPage'  => $page,
+            'totalPages'   => $totalPages,
+            'totalRecords' => $totalRecords
         ];
 
         $this->view('admin/history/index', $data);

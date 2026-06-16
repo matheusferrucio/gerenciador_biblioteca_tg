@@ -49,6 +49,7 @@
                 <table class="table" id="historyFilterTable">
                     <thead>
                         <tr>
+                            <th>Ação</th>
                             <th>Data do Empréstimo</th>
                             <th>Data de Devolução</th>
                             <th>Livro</th>
@@ -58,15 +59,37 @@
                     </thead>
                     <tbody>
                         <?php foreach ($history as $event): ?>
-                            <?php $eventDate = date('Y-m-d', strtotime($event->action_date)); ?>
+                            <?php 
+                                $eventDate = date('Y-m-d', strtotime($event->action_date)); 
+                                // Map action to new terms and badges
+                                $rawAction = mb_strtolower($event->action, 'UTF-8');
+                                $actionDisplay = match($rawAction) {
+                                    'empréstimo', 'emprestado'  => 'emprestado',
+                                    'devolução', 'devolvido'    => 'devolvido',
+                                    'prorrogação', 'prorrogado' => 'prorrogado',
+                                    default => $rawAction
+                                };
+
+                                $badgeClass = match($actionDisplay) {
+                                    'emprestado' => 'success',
+                                    'devolvido'  => 'secondary',
+                                    'prorrogado' => 'purple',
+                                    default      => 'secondary'
+                                };
+                            ?>
                             <tr data-book="<?= htmlspecialchars($event->book_title) ?>"
                                 data-user="<?= htmlspecialchars($event->user_name) ?>"
                                 data-date="<?= $eventDate ?>">
                                 <td>
+                                    <span class="badge badge-<?= $badgeClass ?>">
+                                        <?= ucfirst($actionDisplay) ?>
+                                    </span>
+                                </td>
+                                <td>
                                     <strong><?= date('d/m/Y', strtotime($event->loan_date)) ?></strong>
                                 </td>
                                 <td>
-                                    <?= $event->action === 'Devolução' ? date('d/m/Y', strtotime($event->action_date)) : '<span class="text-muted">—</span>' ?>
+                                    <?= ($event->action === 'Devolução' || $event->action === 'devolvido') ? date('d/m/Y', strtotime($event->action_date)) : '<span class="text-muted">—</span>' ?>
                                 </td>
                                 <td><?= htmlspecialchars($event->book_title) ?></td>
                                 <td><?= htmlspecialchars($event->user_name) ?></td>
@@ -82,6 +105,29 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- ── Pagination ── -->
+            <?php if ($totalPages > 1): ?>
+                <div class="pagination">
+                    <a href="?page=<?= $currentPage - 1 ?>" class="page-link <?= $currentPage <= 1 ? 'disabled' : '' ?>">
+                        Anterior
+                    </a>
+
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?page=<?= $i ?>" class="page-link <?= $currentPage == $i ? 'active' : '' ?>">
+                            <?= $i ?>
+                        </a>
+                    <?php endfor; ?>
+
+                    <a href="?page=<?= $currentPage + 1 ?>" class="page-link <?= $currentPage >= $totalPages ? 'disabled' : '' ?>">
+                        Próximo
+                    </a>
+                </div>
+            <?php endif; ?>
+            
+            <p class="text-muted" style="text-align: center; margin-top: 10px; font-size: 12px;">
+                Mostrando <?= count($history) ?> de <?= $totalRecords ?> registros totais.
+            </p>
         <?php endif; ?>
     </div>
 </div>

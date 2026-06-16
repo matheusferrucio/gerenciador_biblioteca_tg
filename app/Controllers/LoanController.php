@@ -119,7 +119,7 @@ class LoanController extends Controller
             
             $this->historyModel->log([
                 'loan_id'   => $loanId,
-                'action'    => 'Empréstimo',
+                'action'    => 'emprestado',
                 'user_name' => $user->name ?? 'Usuário',
                 'book_title'=> $book->title ?? 'Livro',
                 'loan_date' => $data['loan_date'],
@@ -160,7 +160,7 @@ class LoanController extends Controller
             // Log History
             $this->historyModel->log([
                 'loan_id'   => $id,
-                'action'    => 'Devolução',
+                'action'    => 'devolvido',
                 'user_name' => $loan->user_name,
                 'book_title'=> $loan->book_title,
                 'loan_date' => $loan->loan_date,
@@ -210,7 +210,7 @@ class LoanController extends Controller
             
             $this->historyModel->log([
                 'loan_id'        => $id,
-                'action'         => 'Prorrogação',
+                'action'         => 'prorrogado',
                 'user_name'      => $loan->user_name,
                 'book_title'     => $loan->book_title,
                 'loan_date'      => $loan->loan_date,

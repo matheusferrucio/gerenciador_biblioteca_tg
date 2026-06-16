@@ -23,6 +23,8 @@
     --info: #0891b2;
     --info-light: #ecfeff;
     --secondary: #6b7280;
+    --purple: #7c3aed;
+    --purple-light: #f5f3ff;
 
     /* Neutrals */
     --gray-50: #f9fafb;
@@ -466,6 +468,58 @@ td.actions {
 .badge-secondary {
     background: var(--gray-100);
     color: var(--gray-500);
+}
+
+.badge-purple {
+    background: #f5f3ff;
+    color: #7c3aed;
+}
+
+/* ── Pagination ── */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--gray-100);
+}
+
+.page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    color: var(--gray-600);
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.page-link:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.page-link.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+    box-shadow: 0 4px 6px -1px rgba(var(--primary-rgb), 0.2);
+}
+
+.page-link.disabled {
+    background: var(--gray-50);
+    color: var(--gray-400);
+    cursor: not-allowed;
+    border-color: var(--gray-200);
+    pointer-events: none;
 }
 
 /* ── Buttons ── */

@@ -54,4 +54,25 @@ class History
         $this->db->query('SELECT * FROM loan_history ORDER BY action_date DESC');
         return $this->db->resultSet();
     }
+
+    /**
+     * Count total history records
+     */
+    public function countAll(): int
+    {
+        $this->db->query('SELECT COUNT(*) as total FROM loan_history');
+        return (int)$this->db->single()->total;
+    }
+
+    /**
+     * Get paginated history records
+     */
+    public function getPaginated(int $page, int $limit): array
+    {
+        $offset = ($page - 1) * $limit;
+        $this->db->query('SELECT * FROM loan_history ORDER BY action_date DESC LIMIT :offset, :limit');
+        $this->db->bind(':offset', $offset, PDO::PARAM_INT);
+        $this->db->bind(':limit', $limit, PDO::PARAM_INT);
+        return $this->db->resultSet();
+    }
 }
